@@ -1,6 +1,51 @@
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/router';
 
+const BOARD_WIDTH = 600;
+const BOARD_HEIGHT = 300;
+const DOT_RADIUS = 20;
+const MIN_DISTANCE = 75;
+
+const styles = {
+  container: {
+    backgroundColor: 'white',
+    color: 'black',
+    minHeight: '100vh',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'column',
+    fontFamily: 'sans-serif',
+    textAlign: 'center',
+  },
+  center: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1rem',
+    alignItems: 'center',
+  },
+  gameArea: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
+  board: {
+    width: BOARD_WIDTH,
+    height: BOARD_HEIGHT,
+    backgroundColor: '#e0e0e0',
+    position: 'relative',
+    border: '2px solid black',
+    marginBottom: '1rem',
+  },
+  dot: {
+    width: DOT_RADIUS * 2,
+    height: DOT_RADIUS * 2,
+    borderRadius: '50%',
+    backgroundColor: 'red',
+    position: 'absolute',
+  },
+};
+
 export default function DveTecky() {
   const router = useRouter();
   const [authChecked, setAuthChecked] = useState(false);
@@ -13,11 +58,6 @@ export default function DveTecky() {
   const intervalRef = useRef(null);
   const durationRef = useRef(null);
   const intervalInputRef = useRef(null);
-
-  const BOARD_WIDTH = 600;
-  const BOARD_HEIGHT = 300;
-  const DOT_RADIUS = 20;
-  const MIN_DISTANCE = 75;
 
   useEffect(() => {
     const isAuthenticated = sessionStorage.getItem('authenticated') === 'true';
@@ -158,43 +198,3 @@ export default function DveTecky() {
     </div>
   );
 }
-
-const styles = {
-  container: {
-    backgroundColor: 'white',
-    color: 'black',
-    minHeight: '100vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'column',
-    fontFamily: 'sans-serif',
-    textAlign: 'center',
-  },
-  center: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1rem',
-    alignItems: 'center',
-  },
-  gameArea: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-  },
-  board: {
-    width: 600,
-    height: 300,
-    backgroundColor: '#e0e0e0',
-    position: 'relative',
-    border: '2px solid black',
-    marginBottom: '1rem',
-  },
-  dot: {
-    width: DOT_RADIUS * 2,
-    height: DOT_RADIUS * 2,
-    borderRadius: '50%',
-    backgroundColor: 'red',
-    position: 'absolute',
-  },
-};
