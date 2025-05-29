@@ -11,6 +11,9 @@ export default function DveTecky() {
   const [dots, setDots] = useState([]);
   const intervalRef = useRef(null);
 
+  const durationRef = useRef();
+  const intervalInputRef = useRef();
+
   const BOARD_WIDTH = 600;
   const BOARD_HEIGHT = 300;
   const DOT_RADIUS = 20;
@@ -72,8 +75,8 @@ export default function DveTecky() {
   };
 
   const startGame = () => {
-    const duration = parseInt(document.getElementById('duration').value);
-    const interval = parseInt(document.getElementById('interval').value);
+    const duration = parseInt(durationRef.current.value);
+    const interval = parseInt(intervalInputRef.current.value);
     if (isNaN(duration) || isNaN(interval)) {
       alert("Zadej platná čísla.");
       return;
@@ -98,12 +101,12 @@ export default function DveTecky() {
           <h1>Mód: Dvě tečky</h1>
           <label>
             Délka hry (5–60s):{' '}
-            <input id="duration" type="number" min="5" max="60" defaultValue="10" />
+            <input ref={durationRef} type="number" min="5" max="60" defaultValue="10" />
           </label>
           <br />
           <label>
             Interval (1–10s):{' '}
-            <input id="interval" type="number" min="1" max="10" defaultValue="2" />
+            <input ref={intervalInputRef} type="number" min="1" max="10" defaultValue="2" />
           </label>
           <br />
           <button onClick={startGame}>Start</button>
