@@ -32,6 +32,7 @@ export default function Modes() {
         <button onClick={() => goToMode('tecka')} style={styles.button}>Tečka</button>
         <button onClick={() => goToMode('dvetecky')} style={styles.button}>Dvě Tečky</button>
         <button onClick={() => goToMode('sleduj')} style={styles.button}>Sleduj</button>
+        <button onClick={() => goToMode('najdi')} style={styles.button}>Najdi</button>
       </div>
     </div>
   );
