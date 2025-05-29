@@ -9,6 +9,7 @@ export default function DveTecky() {
   const [intervalTime, setIntervalTime] = useState(2);
   const [gameOver, setGameOver] = useState(false);
   const [dots, setDots] = useState([]);
+  const gameTimerRef = useRef(null);
   const intervalRef = useRef(null);
 
   const durationRef = useRef();
@@ -27,34 +28,6 @@ export default function DveTecky() {
       setAuthChecked(true);
     }
   }, []);
-
-  useEffect(() => {
-    if (gameRunning) {
-      const gameTimer = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            clearInterval(gameTimer);
-            clearInterval(intervalRef.current);
-            setGameRunning(false);
-            setGameOver(true);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-
-      generateDots();
-
-      intervalRef.current = setInterval(() => {
-        generateDots();
-      }, intervalTime * 1000);
-
-      return () => {
-        clearInterval(gameTimer);
-        clearInterval(intervalRef.current);
-      };
-    }
-  }, [gameRunning, intervalTime]);
 
   const generateDots = () => {
     let leftDot, rightDot, distance;
@@ -78,19 +51,47 @@ export default function DveTecky() {
     const duration = parseInt(durationRef.current.value);
     const interval = parseInt(intervalInputRef.current.value);
     if (isNaN(duration) || isNaN(interval)) {
-      alert("Zadej platná čísla.");
+      alert('Zadej platná čísla.');
       return;
     }
+
     setTimeLeft(duration);
     setIntervalTime(interval);
     setGameRunning(true);
     setGameOver(false);
+    setDots([]);
+    generateDots();
+
+    gameTimerRef.current = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(gameTimerRef.current);
+          clearInterval(intervalRef.current);
+          setGameRunning(false);
+          setGameOver(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    intervalRef.current = setInterval(() => {
+      generateDots();
+    }, interval * 1000);
   };
 
   const restartGame = () => {
     setGameOver(false);
+    setGameRunning(false);
     setDots([]);
   };
+
+  useEffect(() => {
+    return () => {
+      clearInterval(gameTimerRef.current);
+      clearInterval(intervalRef.current);
+    };
+  }, []);
 
   if (!authChecked) return null;
 
@@ -116,13 +117,13 @@ export default function DveTecky() {
       {gameRunning && (
         <div style={styles.gameArea}>
           <div style={styles.board}>
-            {dots.map((dot, i) => (
+            {dots.map((dot, index) => (
               <div
-                key={i}
+                key={index}
                 style={{
                   ...styles.dot,
-                  left: dot.x,
-                  top: dot.y,
+                  left: `${dot.x}px`,
+                  top: `${dot.y}px`,
                 }}
               />
             ))}

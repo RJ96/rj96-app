@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 
-const SHAPES = ["◯", "■", "◆", "▲"];
+const SHAPES = ["●", "■", "◆", "▲"];
 const MAX_TIME = 20;
 
 export default function NajdiHra() {
@@ -16,13 +16,17 @@ export default function NajdiHra() {
   const [gameOver, setGameOver] = useState(false);
 
   const generateSymbols = () => {
-    const newSymbols = [];
-    const total = 25;
+    const total = 70; // větší počet symbolů
     const triangleIndex = Math.floor(Math.random() * total);
+    const newSymbols = [];
+
     for (let i = 0; i < total; i++) {
       const shape = i === triangleIndex ? "▲" : SHAPES[Math.floor(Math.random() * 3)];
-      newSymbols.push({ shape, id: i });
+      const left = Math.random() * 90; // %
+      const top = Math.random() * 80; // %
+      newSymbols.push({ shape, id: i, left, top });
     }
+
     setSymbols(newSymbols);
     setFound(false);
     setTimeLeft(MAX_TIME);
@@ -61,7 +65,7 @@ export default function NajdiHra() {
   if (gameOver) {
     return (
       <div style={styles.centered}>
-        <h1>Konec hry</h1>
+        <h1 style={styles.text}>Konec hry</h1>
         <button onClick={() => router.push("/najdi")}>Nová hra</button>
         <button onClick={() => router.push("/")}>Zpět do výběru módů</button>
       </div>
@@ -70,11 +74,21 @@ export default function NajdiHra() {
 
   return (
     <div style={styles.wrapper}>
-      <h2>Kolo {round + 1} z {totalRounds}</h2>
-      <p>Zbývá čas: {timeLeft}s</p>
-      <div style={styles.grid}>
+      <div style={styles.header}>
+        <h2 style={styles.text}>Kolo {round + 1} z {totalRounds}</h2>
+        <p style={styles.text}>Zbývá čas: {timeLeft}s</p>
+      </div>
+      <div style={styles.board}>
         {symbols.map((s) => (
-          <div key={s.id} style={styles.symbol} onClick={() => handleClick(s)}>
+          <div
+            key={s.id}
+            style={{
+              ...styles.symbol,
+              left: `${s.left}%`,
+              top: `${s.top}%`,
+            }}
+            onClick={() => handleClick(s)}
+          >
             {s.shape}
           </div>
         ))}
@@ -85,32 +99,39 @@ export default function NajdiHra() {
 
 const styles = {
   wrapper: {
-    backgroundColor: "#D2C7B0",
+    backgroundColor: "#1E1E1E",
+    position: "relative",
     minHeight: "100vh",
-    color: "#000",
-    padding: "20px",
-    textAlign: "center",
+    overflow: "hidden",
   },
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(5, 60px)",
-    gridGap: "15px",
-    justifyContent: "center",
-    marginTop: "20px",
+  header: {
+    textAlign: "center",
+    paddingTop: "20px",
+  },
+  text: {
+    color: "#85CFFF",
+  },
+  board: {
+    position: "relative",
+    width: "100%",
+    height: "80vh",
   },
   symbol: {
+    position: "absolute",
     fontSize: "36px",
+    color: "#85CFFF",
     cursor: "pointer",
     userSelect: "none",
   },
   centered: {
-    backgroundColor: "#D2C7B0",
+    backgroundColor: "#1E1E1E",
     minHeight: "100vh",
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
     textAlign: "center",
-    gap: "20px"
+    gap: "20px",
+    color: "#85CFFF",
   },
 };
