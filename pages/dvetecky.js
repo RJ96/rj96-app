@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/router';
 
 export default function DveTecky() {
@@ -48,8 +48,8 @@ export default function DveTecky() {
   };
 
   const startGame = () => {
-    const duration = parseInt(durationRef.current.value);
-    const interval = parseInt(intervalInputRef.current.value);
+    const duration = parseInt(document.getElementById('duration').value);
+    const interval = parseInt(document.getElementById('interval').value);
     if (isNaN(duration) || isNaN(interval)) {
       alert('Zadej platná čísla.');
       return;
