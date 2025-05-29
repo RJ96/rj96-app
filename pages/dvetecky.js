@@ -6,14 +6,13 @@ export default function DveTecky() {
   const [authChecked, setAuthChecked] = useState(false);
   const [gameRunning, setGameRunning] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
-  const [intervalTime, setIntervalTime] = useState(2);
   const [gameOver, setGameOver] = useState(false);
   const [dots, setDots] = useState([]);
+  
   const gameTimerRef = useRef(null);
   const intervalRef = useRef(null);
-
-  const durationRef = useRef();
-  const intervalInputRef = useRef();
+  const durationRef = useRef(null);
+  const intervalInputRef = useRef(null);
 
   const BOARD_WIDTH = 600;
   const BOARD_HEIGHT = 300;
@@ -21,25 +20,25 @@ export default function DveTecky() {
   const MIN_DISTANCE = 75;
 
   useEffect(() => {
-    const isAuthenticated = localStorage.getItem('authenticated') === 'true';
+    const isAuthenticated = sessionStorage.getItem('authenticated') === 'true';
     if (!isAuthenticated) {
       router.replace('/');
     } else {
       setAuthChecked(true);
     }
-  }, []);
+  }, [router]);
 
   const generateDots = () => {
     let leftDot, rightDot, distance;
 
     do {
       leftDot = {
-        x: Math.random() * (BOARD_WIDTH / 2 - DOT_RADIUS * 2),
-        y: Math.random() * (BOARD_HEIGHT - DOT_RADIUS * 2),
+        x: Math.random() * ((BOARD_WIDTH / 2) - DOT_RADIUS * 2) + DOT_RADIUS,
+        y: Math.random() * (BOARD_HEIGHT - DOT_RADIUS * 2) + DOT_RADIUS,
       };
       rightDot = {
-        x: Math.random() * (BOARD_WIDTH / 2 - DOT_RADIUS * 2) + BOARD_WIDTH / 2,
-        y: Math.random() * (BOARD_HEIGHT - DOT_RADIUS * 2),
+        x: Math.random() * ((BOARD_WIDTH / 2) - DOT_RADIUS * 2) + BOARD_WIDTH / 2 + DOT_RADIUS,
+        y: Math.random() * (BOARD_HEIGHT - DOT_RADIUS * 2) + DOT_RADIUS,
       };
       distance = Math.hypot(leftDot.x - rightDot.x, leftDot.y - rightDot.y);
     } while (distance < MIN_DISTANCE);
@@ -48,18 +47,20 @@ export default function DveTecky() {
   };
 
   const startGame = () => {
-    const duration = parseInt(document.getElementById('duration').value);
-    const interval = parseInt(document.getElementById('interval').value);
-    if (isNaN(duration) || isNaN(interval)) {
-      alert('Zadej platná čísla.');
+    const duration = parseInt(durationRef.current.value);
+    const interval = parseInt(intervalInputRef.current.value);
+
+    if (
+      isNaN(duration) || duration < 5 || duration > 60 ||
+      isNaN(interval) || interval < 1 || interval > 10
+    ) {
+      alert('Zadej platná čísla: délka 5–60s, interval 1–10s.');
       return;
     }
 
     setTimeLeft(duration);
-    setIntervalTime(interval);
     setGameRunning(true);
     setGameOver(false);
-    setDots([]);
     generateDots();
 
     gameTimerRef.current = setInterval(() => {
@@ -81,9 +82,12 @@ export default function DveTecky() {
   };
 
   const restartGame = () => {
+    clearInterval(gameTimerRef.current);
+    clearInterval(intervalRef.current);
     setGameOver(false);
     setGameRunning(false);
     setDots([]);
+    setTimeLeft(0);
   };
 
   useEffect(() => {
@@ -102,12 +106,24 @@ export default function DveTecky() {
           <h1>Mód: Dvě tečky</h1>
           <label>
             Délka hry (5–60s):{' '}
-            <input ref={durationRef} type="number" min="5" max="60" defaultValue="10" />
+            <input
+              ref={durationRef}
+              type="number"
+              min="5"
+              max="60"
+              defaultValue="10"
+            />
           </label>
           <br />
           <label>
             Interval (1–10s):{' '}
-            <input ref={intervalInputRef} type="number" min="1" max="10" defaultValue="2" />
+            <input
+              ref={intervalInputRef}
+              type="number"
+              min="1"
+              max="10"
+              defaultValue="2"
+            />
           </label>
           <br />
           <button onClick={startGame}>Start</button>
@@ -122,8 +138,8 @@ export default function DveTecky() {
                 key={index}
                 style={{
                   ...styles.dot,
-                  left: `${dot.x}px`,
-                  top: `${dot.y}px`,
+                  left: `${dot.x - DOT_RADIUS}px`,
+                  top: `${dot.y - DOT_RADIUS}px`,
                 }}
               />
             ))}
@@ -175,8 +191,8 @@ const styles = {
     marginBottom: '1rem',
   },
   dot: {
-    width: 40,
-    height: 40,
+    width: DOT_RADIUS * 2,
+    height: DOT_RADIUS * 2,
     borderRadius: '50%',
     backgroundColor: 'red',
     position: 'absolute',
