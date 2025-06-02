@@ -102,7 +102,8 @@ export default function NajdiHra() {
               ...styles.symbol,
               left: `${s.left}%`,
               top: `${s.top}%`,
-            }}
+              fontSize: s.shape === "●" ? "52px" : "44px",
+          }}
             onClick={() => handleClick(s)}
           >
             {s.shape}
