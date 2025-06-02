@@ -16,14 +16,14 @@ export default function NajdiHra() {
   const [gameOver, setGameOver] = useState(false);
 
   const generateSymbols = () => {
-    const total = 90; // více symbolů
+    const total = 110; // více symbolů
     const triangleIndex = Math.floor(Math.random() * total);
     const newSymbols = [];
 
     for (let i = 0; i < total; i++) {
       const shape = i === triangleIndex ? "▲" : SHAPES[Math.floor(Math.random() * 3)];
-      const left = Math.random() * 95; // hustší rozložení
-      const top = Math.random() * 88;  // hustší rozložení
+      const left = Math.random() * 105; // hustší rozložení
+      const top = Math.random() * 98;  // hustší rozložení
       newSymbols.push({ shape, id: i, left, top });
     }
 
