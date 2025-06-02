@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 
 const SHAPES = ["⬤", "■", "◆"];
-const TOTAL_CELLS = 100; // 10x10 mřížka
+const SYMBOL_COUNT = 30; // celkový počet symbolů (1 trojúhelník + 29 jiných)
 const MAX_TIME = 20;
 
 export default function NajdiHra() {
@@ -16,13 +16,32 @@ export default function NajdiHra() {
   const [timeLeft, setTimeLeft] = useState(MAX_TIME);
   const [gameOver, setGameOver] = useState(false);
 
-  const generateGrid = () => {
-    const triangleIndex = Math.floor(Math.random() * TOTAL_CELLS);
-    const newSymbols = [];
+  const generateSymbols = () => {
+    const containerWidth = 400;
+    const containerHeight = 300;
+    const centerX = containerWidth / 2;
+    const centerY = containerHeight / 2;
+    const radiusX = 180;
+    const radiusY = 120;
 
-    for (let i = 0; i < TOTAL_CELLS; i++) {
+    let newSymbols = [];
+
+    // náhodný index pro trojúhelník
+    const triangleIndex = Math.floor(Math.random() * SYMBOL_COUNT);
+
+    for (let i = 0; i < SYMBOL_COUNT; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const x = centerX + radiusX * Math.cos(angle);
+      const y = centerY + radiusY * Math.sin(angle) * 0.5 + 40; // omezí horní/spodní část
+
       const shape = i === triangleIndex ? "▲" : SHAPES[Math.floor(Math.random() * SHAPES.length)];
-      newSymbols.push({ shape, id: i });
+
+      newSymbols.push({
+        shape,
+        id: i,
+        left: x,
+        top: y
+      });
     }
 
     setSymbols(newSymbols);
@@ -32,7 +51,7 @@ export default function NajdiHra() {
 
   useEffect(() => {
     if (round < totalRounds) {
-      setTimeout(generateGrid, 50);
+      setTimeout(generateSymbols, 50);
     } else {
       setGameOver(true);
     }
@@ -76,9 +95,17 @@ export default function NajdiHra() {
         <h2 style={styles.text}>Kolo {round + 1} z {totalRounds}</h2>
         <p style={styles.text}>Zbývá čas: {timeLeft}s</p>
       </div>
-      <div style={styles.grid}>
+      <div style={styles.playArea}>
         {symbols.map((s) => (
-          <div key={s.id} style={styles.cell} onClick={() => handleClick(s)}>
+          <div
+            key={s.id}
+            onClick={() => handleClick(s)}
+            style={{
+              ...styles.symbol,
+              left: s.left,
+              top: s.top,
+            }}
+          >
             {s.shape}
           </div>
         ))}
@@ -91,41 +118,40 @@ const styles = {
   wrapper: {
     backgroundColor: "#1E1E1E",
     height: "100vh",
-    width: "100vw",
+    color: "#85CFFF",
     display: "flex",
     flexDirection: "column",
+    alignItems: "center"
   },
   header: {
+    marginTop: 20,
+    marginBottom: 10,
     textAlign: "center",
-    padding: "10px",
-    flexShrink: 0,
   },
   text: {
-    color: "#85CFFF",
     margin: 0,
   },
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(10, 1fr)",
-    gridTemplateRows: "repeat(10, 1fr)",
-    gap: "6px",
-    padding: "10px",
-    margin: "0 auto",
-    width: "400px",
-    height: "400px",
-    backgroundColor: "#1E1E1E",
+  playArea: {
+    position: "relative",
+    width: 400,
+    height: 300,
+    backgroundColor: "#121212",
+    border: "2px solid #85CFFF",
+    borderRadius: "16px",
+    overflow: "hidden",
+    marginTop: 10,
   },
-  cell: {
-    fontSize: "24px",
+  symbol: {
+    position: "absolute",
+    fontSize: "32px",
+    width: "32px",
+    height: "32px",
+    textAlign: "center",
+    lineHeight: "32px",
     color: "#85CFFF",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#2A2A2A",
-    borderRadius: "6px",
-    cursor: "pointer",
-    aspectRatio: "1",
     userSelect: "none",
+    cursor: "pointer",
+    transform: "translate(-50%, -50%)",
   },
   centered: {
     backgroundColor: "#1E1E1E",
