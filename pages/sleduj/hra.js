@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useRef } from "react";
-import background from "/goalie.jpg"; // obrázek v public složce
 
 const getRandomPosition = (radius, width, height, existing = []) => {
   let x, y, valid;
@@ -55,6 +54,11 @@ const SledujHra = ({ settings, onRestart }) => {
       stopMovingBalls();
       setGameOver(true);
     }, settings.duration * 1000 + 5000); // konec hry
+
+    // Cleanup při unmountu
+    return () => {
+      stopMovingBalls();
+    };
   }, []);
 
   const startMovingBalls = () => {
@@ -79,7 +83,9 @@ const SledujHra = ({ settings, onRestart }) => {
     }, 30);
   };
 
-  const stopMovingBalls = () => clearInterval(intervalRef.current);
+  const stopMovingBalls = () => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+  };
 
   const handleBallClick = (id) => {
     if (!gameOver || markedBalls.includes(id)) return;
@@ -102,7 +108,7 @@ const SledujHra = ({ settings, onRestart }) => {
           width: 600,
           height: 400,
           margin: "0 auto",
-          backgroundImage: `url(${background})`,
+          backgroundImage: `url('/goalie.jpg')`,
           backgroundSize: "cover",
           position: "relative",
           border: "2px solid black",
@@ -138,9 +144,7 @@ const SledujHra = ({ settings, onRestart }) => {
               }}
             >
               {gameOver && isMarked ? markedBalls.indexOf(ball.id) + 1 : ""}
-              {showNumbers && isCorrect
-                ? selectedBalls.indexOf(ball.id) + 1
-                : ""}
+              {showNumbers && isCorrect ? selectedBalls.indexOf(ball.id) + 1 : ""}
             </div>
           );
         })}
