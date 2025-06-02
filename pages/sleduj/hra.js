@@ -26,10 +26,13 @@ const SledujHra = ({ settings, onRestart }) => {
     const newBalls = [];
     for (let i = 0; i < settings.totalBalls; i++) {
       const position = getRandomPosition(radius, 600, 400, newBalls);
+      const angle = Math.random() * 2 * Math.PI;
+      const dx = speed * Math.cos(angle);
+      const dy = speed * Math.sin(angle);
       newBalls.push({
         ...position,
-        dx: speed,
-        dy: speed,
+        dx,
+        dy,
         id: i,
       });
     }
@@ -45,21 +48,23 @@ const SledujHra = ({ settings, onRestart }) => {
     setGameOver(false);
     setResults({ correct: 0, incorrect: 0 });
 
-    setTimeout(() => {
+    const showNumbersTimeout = setTimeout(() => {
       setShowNumbers(false);
       startMovingBalls();
     }, 5000); // 5 sekund na zapamatování
 
-    setTimeout(() => {
+    const gameDurationTimeout = setTimeout(() => {
       stopMovingBalls();
       setGameOver(true);
     }, settings.duration * 1000 + 5000); // konec hry
 
-    // Cleanup při unmountu
     return () => {
+      clearTimeout(showNumbersTimeout);
+      clearTimeout(gameDurationTimeout);
       stopMovingBalls();
     };
-  }, []);
+    // Přidáno settings jako závislost, aby se hra restartovala po změně nastavení
+  }, [settings]);
 
   const startMovingBalls = () => {
     intervalRef.current = setInterval(() => {
@@ -68,15 +73,18 @@ const SledujHra = ({ settings, onRestart }) => {
           let newX = ball.x + ball.dx;
           let newY = ball.y + ball.dy;
 
-          if (newX <= radius || newX >= 600 - radius) ball.dx *= -1;
-          if (newY <= radius || newY >= 400 - radius) ball.dy *= -1;
+          let dx = ball.dx;
+          let dy = ball.dy;
+
+          if (newX <= radius || newX >= 600 - radius) dx = -dx;
+          if (newY <= radius || newY >= 400 - radius) dy = -dy;
 
           return {
             ...ball,
             x: newX <= radius ? radius : newX >= 600 - radius ? 600 - radius : newX,
             y: newY <= radius ? radius : newY >= 400 - radius ? 400 - radius : newY,
-            dx: ball.dx,
-            dy: ball.dy,
+            dx,
+            dy,
           };
         })
       );
