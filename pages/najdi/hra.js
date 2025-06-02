@@ -1,11 +1,9 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 
-// Nahrazeno větším kolečkem ⬤
-const SHAPES = ["⬤", "■", "◆", "▲"];
+const SHAPES = ["⬤", "■", "◆"];
+const TOTAL_CELLS = 100; // 10x10 mřížka
 const MAX_TIME = 20;
-const SYMBOL_SIZE_PX = 36; // menší symbol
-const MARGIN_PX = 8; // menší okraj
 
 export default function NajdiHra() {
   const router = useRouter();
@@ -18,28 +16,13 @@ export default function NajdiHra() {
   const [timeLeft, setTimeLeft] = useState(MAX_TIME);
   const [gameOver, setGameOver] = useState(false);
 
-  const generateSymbols = () => {
-    const total = 150; // více symbolů na menším prostoru
-    const triangleIndex = Math.floor(Math.random() * total);
-
-    const board = document.getElementById("board");
-    const boardWidth = board ? board.clientWidth : window.innerWidth;
-    const boardHeight = board ? board.clientHeight : window.innerHeight;
-
+  const generateGrid = () => {
+    const triangleIndex = Math.floor(Math.random() * TOTAL_CELLS);
     const newSymbols = [];
 
-    for (let i = 0; i < total; i++) {
-      const shape = i === triangleIndex ? "▲" : SHAPES[Math.floor(Math.random() * 3)];
-
-      const leftPx =
-        MARGIN_PX + Math.random() * (boardWidth - 2 * MARGIN_PX - SYMBOL_SIZE_PX);
-      const topPx =
-        MARGIN_PX + Math.random() * (boardHeight - 2 * MARGIN_PX - SYMBOL_SIZE_PX);
-
-      const left = (leftPx / boardWidth) * 100;
-      const top = (topPx / boardHeight) * 100;
-
-      newSymbols.push({ shape, id: i, left, top });
+    for (let i = 0; i < TOTAL_CELLS; i++) {
+      const shape = i === triangleIndex ? "▲" : SHAPES[Math.floor(Math.random() * SHAPES.length)];
+      newSymbols.push({ shape, id: i });
     }
 
     setSymbols(newSymbols);
@@ -49,7 +32,7 @@ export default function NajdiHra() {
 
   useEffect(() => {
     if (round < totalRounds) {
-      setTimeout(generateSymbols, 50);
+      setTimeout(generateGrid, 50);
     } else {
       setGameOver(true);
     }
@@ -93,21 +76,9 @@ export default function NajdiHra() {
         <h2 style={styles.text}>Kolo {round + 1} z {totalRounds}</h2>
         <p style={styles.text}>Zbývá čas: {timeLeft}s</p>
       </div>
-      <div id="board" style={styles.board}>
+      <div style={styles.grid}>
         {symbols.map((s) => (
-          <div
-            key={s.id}
-            style={{
-              ...styles.symbol,
-              left: `${s.left}%`,
-              top: `${s.top}%`,
-              width: SYMBOL_SIZE_PX,
-              height: SYMBOL_SIZE_PX,
-              lineHeight: `${SYMBOL_SIZE_PX}px`,
-              textAlign: "center",
-            }}
-            onClick={() => handleClick(s)}
-          >
+          <div key={s.id} style={styles.cell} onClick={() => handleClick(s)}>
             {s.shape}
           </div>
         ))}
@@ -126,26 +97,34 @@ const styles = {
   },
   header: {
     textAlign: "center",
-    padding: "8px 0",
+    padding: "10px",
     flexShrink: 0,
   },
   text: {
     color: "#85CFFF",
     margin: 0,
   },
-  board: {
-    position: "relative",
-    flexGrow: 1,
-    width: "95vw", // menší hrací pole
-    height: "80vh", // menší výška
+  grid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(10, 1fr)",
+    gridTemplateRows: "repeat(10, 1fr)",
+    gap: "6px",
+    padding: "10px",
     margin: "0 auto",
+    width: "400px",
+    height: "400px",
     backgroundColor: "#1E1E1E",
   },
-  symbol: {
-    position: "absolute",
-    fontSize: `${SYMBOL_SIZE_PX}px`,
+  cell: {
+    fontSize: "24px",
     color: "#85CFFF",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#2A2A2A",
+    borderRadius: "6px",
     cursor: "pointer",
+    aspectRatio: "1",
     userSelect: "none",
   },
   centered: {

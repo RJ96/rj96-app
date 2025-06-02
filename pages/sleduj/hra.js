@@ -18,6 +18,8 @@ export default function SledujHra() {
   useEffect(() => {
     const count = parseInt(pocetMicek);
     const speed = parseInt(rychlost);
+    if (isNaN(count) || isNaN(speed) || count <= 0 || speed <= 0) return;
+
     const newBalls = Array.from({ length: count }).map((_, i) => ({
       id: i,
       x: Math.random() * 80 + 10,
@@ -25,6 +27,7 @@ export default function SledujHra() {
       dx: (Math.random() - 0.5) * speed * 1.5,
       dy: (Math.random() - 0.5) * speed * 1.5,
     }));
+
     const targets = [...Array(count).keys()].sort(() => 0.5 - Math.random()).slice(0, count);
     setBalls(newBalls);
     setTargetIds(targets);
@@ -71,14 +74,16 @@ export default function SledujHra() {
 
   return (
     <div className="relative w-full h-screen overflow-hidden">
-      <Image
-        src="/goalie.jpg"
-        alt="Goalie"
-        layout="fill"
-        objectFit="cover"
-        quality={100}
-        priority
-      />
+      <div className="absolute inset-0">
+        <Image
+          src="/goalie.jpg"
+          alt="Goalie"
+          layout="fill"
+          objectFit="contain"
+          quality={100}
+          priority
+        />
+      </div>
 
       {balls.map((ball) => {
         const isClicked = clicks.includes(ball.id);
@@ -87,7 +92,7 @@ export default function SledujHra() {
         const missed = showTargets && isTarget && !isClicked;
         const wrong = showTargets && !isTarget && isClicked;
 
-        let bg = "#c8ff00"; // základní žlutozelená
+        let bg = "#f7f700"; // světle žlutá
         if (correct) bg = "green";
         else if (missed) bg = "red";
         else if (wrong) bg = "gray";
