@@ -1,9 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/router";
 
-// odstraněný import obrázku !
-// import background from "/goalie.jpg";
-
 const getRandomPosition = (radius, width, height, existing = []) => {
   let x, y, valid;
   do {
@@ -14,7 +11,7 @@ const getRandomPosition = (radius, width, height, existing = []) => {
   return { x, y };
 };
 
-const SledujHra = ({ onRestart }) => {
+const SledujHra = () => {
   const router = useRouter();
 
   const [settings, setSettings] = useState(null);
@@ -25,8 +22,9 @@ const SledujHra = ({ onRestart }) => {
   const [gameOver, setGameOver] = useState(false);
   const [results, setResults] = useState({ correct: 0, incorrect: 0 });
 
-  const radius = 30;
+  const containerRef = useRef(null);
   const intervalRef = useRef(null);
+  const radius = 20; // menší koule
 
   useEffect(() => {
     if (!router.isReady) return;
@@ -42,13 +40,15 @@ const SledujHra = ({ onRestart }) => {
   }, [router.isReady, router.query]);
 
   useEffect(() => {
-    if (!settings) return;
+    if (!settings || !containerRef.current) return;
+
+    const { clientWidth, clientHeight } = containerRef.current;
 
     const newBalls = [];
     for (let i = 0; i < settings.totalBalls; i++) {
-      const position = getRandomPosition(radius, 600, 400, newBalls);
+      const pos = getRandomPosition(radius, clientWidth, clientHeight, newBalls);
       newBalls.push({
-        ...position,
+        ...pos,
         dx: settings.speed,
         dy: settings.speed,
         id: i,
@@ -69,12 +69,12 @@ const SledujHra = ({ onRestart }) => {
     const showNumbersTimeout = setTimeout(() => {
       setShowNumbers(false);
       startMovingBalls();
-    }, 5000); // 5 sekund na zapamatování
+    }, 5000);
 
     const endGameTimeout = setTimeout(() => {
       stopMovingBalls();
       setGameOver(true);
-    }, settings.duration * 1000 + 5000); // konec hry
+    }, settings.duration * 1000 + 5000);
 
     return () => {
       clearTimeout(showNumbersTimeout);
@@ -85,23 +85,25 @@ const SledujHra = ({ onRestart }) => {
 
   const startMovingBalls = () => {
     intervalRef.current = setInterval(() => {
-      setBalls((prevBalls) =>
-        prevBalls.map((ball) => {
+      setBalls((prevBalls) => {
+        if (!containerRef.current) return prevBalls;
+
+        const { clientWidth, clientHeight } = containerRef.current;
+
+        return prevBalls.map((ball) => {
           let newX = ball.x + ball.dx;
           let newY = ball.y + ball.dy;
 
-          if (newX <= radius || newX >= 600 - radius) ball.dx *= -1;
-          if (newY <= radius || newY >= 400 - radius) ball.dy *= -1;
+          if (newX <= radius || newX >= clientWidth - radius) ball.dx *= -1;
+          if (newY <= radius || newY >= clientHeight - radius) ball.dy *= -1;
 
           return {
             ...ball,
-            x: newX <= radius ? radius : newX >= 600 - radius ? 600 - radius : newX,
-            y: newY <= radius ? radius : newY >= 400 - radius ? 400 - radius : newY,
-            dx: ball.dx,
-            dy: ball.dy,
+            x: Math.min(Math.max(newX, radius), clientWidth - radius),
+            y: Math.min(Math.max(newY, radius), clientHeight - radius),
           };
-        })
-      );
+        });
+      });
     }, 30);
   };
 
@@ -123,17 +125,26 @@ const SledujHra = ({ onRestart }) => {
   if (!settings) return <div>Načítání...</div>;
 
   return (
-    <div style={{ textAlign: "center" }}>
-      <h1>Sleduj – Hra</h1>
+    <div
+      style={{
+        position: "relative",
+        width: "100vw",
+        height: "100vh",
+        margin: 0,
+        overflow: "hidden",
+        backgroundImage: "url(/goalie.jpg)",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
       <div
+        ref={containerRef}
         style={{
-          width: 600,
-          height: 400,
-          margin: "0 auto",
-          backgroundImage: `url(/goalie.jpg)`,  // tady cesta bez importu
-          backgroundSize: "cover",
-          position: "relative",
-          border: "2px solid black",
+          position: "absolute",
+          top: 10,
+          bottom: 10,
+          left: 10,
+          right: 10,
         }}
       >
         {balls.map((ball) => {
@@ -149,6 +160,8 @@ const SledujHra = ({ onRestart }) => {
                 height: radius * 2,
                 borderRadius: "50%",
                 backgroundColor: "yellow",
+                backgroundImage:
+                  "repeating-linear-gradient(45deg, #fff 0px, #fff 2px, yellow 2px, yellow 6px)",
                 position: "absolute",
                 left: ball.x - radius,
                 top: ball.y - radius,
@@ -173,14 +186,37 @@ const SledujHra = ({ onRestart }) => {
       </div>
 
       {gameOver && markedBalls.length === selectedBalls.length && (
-        <div style={{ margin: 10 }}>
+        <div
+          style={{
+            position: "absolute",
+            bottom: 20,
+            left: 20,
+            color: "white",
+            fontSize: 20,
+            textShadow: "1px 1px 3px black",
+          }}
+        >
           ✅ Správně: {results.correct} <br />
           ❌ Špatně: {results.incorrect}
         </div>
       )}
 
       {gameOver && (
-        <button style={{ marginTop: 10 }} onClick={() => router.push("/sleduj")}>
+        <button
+          style={{
+            position: "absolute",
+            bottom: 20,
+            right: 20,
+            padding: "10px 20px",
+            fontSize: 16,
+            cursor: "pointer",
+            borderRadius: 8,
+            border: "none",
+            backgroundColor: "#4CAF50",
+            color: "white",
+          }}
+          onClick={() => router.push("/sleduj")}
+        >
           Nová hra
         </button>
       )}

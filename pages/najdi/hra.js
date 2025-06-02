@@ -16,14 +16,14 @@ export default function NajdiHra() {
   const [gameOver, setGameOver] = useState(false);
 
   const generateSymbols = () => {
-    const total = 90; // více symbolů
+    const total = 150; // více symbolů pro zaplnění plochy
     const triangleIndex = Math.floor(Math.random() * total);
     const newSymbols = [];
 
     for (let i = 0; i < total; i++) {
       const shape = i === triangleIndex ? "▲" : SHAPES[Math.floor(Math.random() * 3)];
-      const left = Math.random() * 95; // hustší rozložení
-      const top = Math.random() * 88;  // hustší rozložení
+      const left = Math.random() * 95;
+      const top = Math.random() * 88;
       newSymbols.push({ shape, id: i, left, top });
     }
 
@@ -99,7 +99,7 @@ export default function NajdiHra() {
 
 const styles = {
   wrapper: {
-    backgroundColor: "#1E1E1E", // šedočerné pozadí
+    backgroundColor: "#1E1E1E",
     position: "relative",
     minHeight: "100vh",
     overflow: "hidden",
@@ -109,16 +109,16 @@ const styles = {
     paddingTop: "20px",
   },
   text: {
-    color: "#85CFFF", // světle modré písmo
+    color: "#85CFFF",
   },
   board: {
     position: "relative",
     width: "100%",
-    height: "80vh", // herní plocha zůstává stejná
+    height: "80vh",
   },
   symbol: {
     position: "absolute",
-    fontSize: "44px", // o trochu větší symboly
+    fontSize: "44px", // všechny symboly včetně kolečka jsou stejně velké
     color: "#85CFFF",
     cursor: "pointer",
     userSelect: "none",
