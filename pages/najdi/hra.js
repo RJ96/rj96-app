@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 
-const SHAPES = ["●", "■", "◆", "▲"];
+// Nahrazeno větším kolečkem ⬤
+const SHAPES = ["⬤", "■", "◆", "▲"];
 const MAX_TIME = 20;
-const SYMBOL_SIZE_PX = 44;
-const MARGIN_PX = 16;
+const SYMBOL_SIZE_PX = 36; // menší symbol
+const MARGIN_PX = 8; // menší okraj
 
 export default function NajdiHra() {
   const router = useRouter();
@@ -18,8 +19,9 @@ export default function NajdiHra() {
   const [gameOver, setGameOver] = useState(false);
 
   const generateSymbols = () => {
-    const total = 120;
+    const total = 150; // více symbolů na menším prostoru
     const triangleIndex = Math.floor(Math.random() * total);
+
     const board = document.getElementById("board");
     const boardWidth = board ? board.clientWidth : window.innerWidth;
     const boardHeight = board ? board.clientHeight : window.innerHeight;
@@ -117,16 +119,14 @@ export default function NajdiHra() {
 const styles = {
   wrapper: {
     backgroundColor: "#1E1E1E",
-    position: "relative",
     height: "100vh",
     width: "100vw",
-    overflow: "hidden",
     display: "flex",
     flexDirection: "column",
   },
   header: {
     textAlign: "center",
-    padding: "10px 0",
+    padding: "8px 0",
     flexShrink: 0,
   },
   text: {
@@ -136,7 +136,9 @@ const styles = {
   board: {
     position: "relative",
     flexGrow: 1,
-    width: "100%",
+    width: "95vw", // menší hrací pole
+    height: "80vh", // menší výška
+    margin: "0 auto",
     backgroundColor: "#1E1E1E",
   },
   symbol: {
@@ -153,7 +155,6 @@ const styles = {
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
-    textAlign: "center",
     gap: "20px",
     color: "#85CFFF",
   },

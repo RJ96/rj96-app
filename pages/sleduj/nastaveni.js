@@ -1,85 +1,42 @@
-import React, { useState } from "react";
+// pages/sleduj/nastaveni.js
 import { useRouter } from "next/router";
+import { useState } from "react";
 
-const Nastaveni = () => {
+export default function SledujNastaveni() {
   const router = useRouter();
-  const [settings, setSettings] = useState({
-    totalBalls: 5,
-    markedCount: 2,
-    speed: 5,
-    duration: 10,
-  });
+  const [pocetMicek, setPocetMicek] = useState(3);
+  const [rychlost, setRychlost] = useState(5);
 
-  const handleChange = (field, value) => {
-    setSettings((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const startGame = () => {
-    localStorage.setItem("sledujSettings", JSON.stringify(settings));
-    router.push("/sleduj/hra");
+  const startHra = () => {
+    router.push({
+      pathname: "/sleduj/hra",
+      query: { pocetMicek, rychlost },
+    });
   };
 
   return (
-    <div style={{ textAlign: "center", padding: 20 }}>
-      <h1>Sleduj – Nastavení</h1>
+    <div className="flex flex-col items-center justify-center h-screen bg-gray-100 p-4 text-center">
+      <h1 className="text-3xl font-bold mb-6">Nastavení hry</h1>
 
-      <label>
-        Počet míčků:
-        <input
-          type="number"
-          min={1}
-          max={10}
-          value={settings.totalBalls}
-          onChange={(e) => handleChange("totalBalls", Math.min(Math.max(parseInt(e.target.value) || 1, 1), 10))}
-          style={{ marginLeft: 10, width: 60 }}
-        />
-      </label>
-      <br /><br />
+      <div className="mb-4">
+        <label className="block text-lg font-medium mb-1">Počet míčků:</label>
+        <div className="flex items-center justify-center space-x-4">
+          <button onClick={() => setPocetMicek(Math.max(1, pocetMicek - 1))} className="px-4 py-2 bg-red-500 text-white rounded">-</button>
+          <span className="text-xl font-bold">{pocetMicek}</span>
+          <button onClick={() => setPocetMicek(Math.min(10, pocetMicek + 1))} className="px-4 py-2 bg-green-500 text-white rounded">+</button>
+        </div>
+      </div>
 
-      <label>
-        Označené míčky:
-        <input
-          type="number"
-          min={1}
-          max={10}
-          value={settings.markedCount}
-          onChange={(e) => handleChange("markedCount", Math.min(Math.max(parseInt(e.target.value) || 1, 1), settings.totalBalls))}
-          style={{ marginLeft: 10, width: 60 }}
-        />
-      </label>
-      <br /><br />
+      <div className="mb-6">
+        <label className="block text-lg font-medium mb-1">Rychlost (1–10):</label>
+        <div className="flex items-center justify-center space-x-4">
+          <button onClick={() => setRychlost(Math.max(1, rychlost - 1))} className="px-4 py-2 bg-red-500 text-white rounded">-</button>
+          <span className="text-xl font-bold">{rychlost}</span>
+          <button onClick={() => setRychlost(Math.min(10, rychlost + 1))} className="px-4 py-2 bg-green-500 text-white rounded">+</button>
+        </div>
+      </div>
 
-      <label>
-        Rychlost (1–10):
-        <input
-          type="number"
-          min={1}
-          max={10}
-          value={settings.speed}
-          onChange={(e) => handleChange("speed", Math.min(Math.max(parseInt(e.target.value) || 1, 1), 10))}
-          style={{ marginLeft: 10, width: 60 }}
-        />
-      </label>
-      <br /><br />
-
-      <label>
-        Délka hry (v sekundách):
-        <input
-          type="number"
-          min={1}
-          max={60}
-          value={settings.duration}
-          onChange={(e) => handleChange("duration", Math.min(Math.max(parseInt(e.target.value) || 1, 1), 60))}
-          style={{ marginLeft: 10, width: 60 }}
-        />
-      </label>
-      <br /><br />
-
-      <button onClick={startGame} style={{ padding: "8px 16px", fontSize: 16 }}>
-        Start
-      </button>
+      <button onClick={startHra} className="mt-6 px-6 py-3 bg-blue-600 text-white rounded text-xl shadow">Start</button>
     </div>
   );
-};
-
-export default Nastaveni;
+}
