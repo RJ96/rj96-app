@@ -3,6 +3,8 @@ import { useRouter } from "next/router";
 
 const SHAPES = ["●", "■", "◆", "▲"];
 const MAX_TIME = 20;
+const SYMBOL_SIZE_PX = 44;
+const MARGIN_PX = 16;
 
 export default function NajdiHra() {
   const router = useRouter();
@@ -16,14 +18,25 @@ export default function NajdiHra() {
   const [gameOver, setGameOver] = useState(false);
 
   const generateSymbols = () => {
-    const total = 110; // více symbolů
+    const total = 120;
     const triangleIndex = Math.floor(Math.random() * total);
+    const board = document.getElementById("board");
+    const boardWidth = board ? board.clientWidth : window.innerWidth;
+    const boardHeight = board ? board.clientHeight : window.innerHeight;
+
     const newSymbols = [];
 
     for (let i = 0; i < total; i++) {
       const shape = i === triangleIndex ? "▲" : SHAPES[Math.floor(Math.random() * 3)];
-      const left = Math.random() * 105; // hustší rozložení
-      const top = Math.random() * 98;  // hustší rozložení
+
+      const leftPx =
+        MARGIN_PX + Math.random() * (boardWidth - 2 * MARGIN_PX - SYMBOL_SIZE_PX);
+      const topPx =
+        MARGIN_PX + Math.random() * (boardHeight - 2 * MARGIN_PX - SYMBOL_SIZE_PX);
+
+      const left = (leftPx / boardWidth) * 100;
+      const top = (topPx / boardHeight) * 100;
+
       newSymbols.push({ shape, id: i, left, top });
     }
 
@@ -34,7 +47,7 @@ export default function NajdiHra() {
 
   useEffect(() => {
     if (round < totalRounds) {
-      generateSymbols();
+      setTimeout(generateSymbols, 50);
     } else {
       setGameOver(true);
     }
@@ -78,7 +91,7 @@ export default function NajdiHra() {
         <h2 style={styles.text}>Kolo {round + 1} z {totalRounds}</h2>
         <p style={styles.text}>Zbývá čas: {timeLeft}s</p>
       </div>
-      <div style={styles.board}>
+      <div id="board" style={styles.board}>
         {symbols.map((s) => (
           <div
             key={s.id}
@@ -86,6 +99,10 @@ export default function NajdiHra() {
               ...styles.symbol,
               left: `${s.left}%`,
               top: `${s.top}%`,
+              width: SYMBOL_SIZE_PX,
+              height: SYMBOL_SIZE_PX,
+              lineHeight: `${SYMBOL_SIZE_PX}px`,
+              textAlign: "center",
             }}
             onClick={() => handleClick(s)}
           >
@@ -99,26 +116,32 @@ export default function NajdiHra() {
 
 const styles = {
   wrapper: {
-    backgroundColor: "#1E1E1E", // šedočerné pozadí
+    backgroundColor: "#1E1E1E",
     position: "relative",
-    minHeight: "100vh",
+    height: "100vh",
+    width: "100vw",
     overflow: "hidden",
+    display: "flex",
+    flexDirection: "column",
   },
   header: {
     textAlign: "center",
-    paddingTop: "20px",
+    padding: "10px 0",
+    flexShrink: 0,
   },
   text: {
-    color: "#85CFFF", // světle modré písmo
+    color: "#85CFFF",
+    margin: 0,
   },
   board: {
     position: "relative",
+    flexGrow: 1,
     width: "100%",
-    height: "80vh", // herní plocha zůstává stejná
+    backgroundColor: "#1E1E1E",
   },
   symbol: {
     position: "absolute",
-    fontSize: "44px", // o trochu větší symboly
+    fontSize: `${SYMBOL_SIZE_PX}px`,
     color: "#85CFFF",
     cursor: "pointer",
     userSelect: "none",

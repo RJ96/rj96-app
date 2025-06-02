@@ -6,7 +6,7 @@ const Nastaveni = () => {
   const [settings, setSettings] = useState({
     totalBalls: 5,
     markedCount: 2,
-    speed: 3,
+    speed: 5,
     duration: 10,
   });
 
