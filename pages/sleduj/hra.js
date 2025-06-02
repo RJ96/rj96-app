@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/router";
-import background from "/goalie.jpg"; // obrázek v public složce
+
+// odstraněný import obrázku !
+// import background from "/goalie.jpg";
 
 const getRandomPosition = (radius, width, height, existing = []) => {
   let x, y, valid;
@@ -128,7 +130,7 @@ const SledujHra = ({ onRestart }) => {
           width: 600,
           height: 400,
           margin: "0 auto",
-          backgroundImage: `url(${background})`,
+          backgroundImage: `url(/goalie.jpg)`,  // tady cesta bez importu
           backgroundSize: "cover",
           position: "relative",
           border: "2px solid black",
