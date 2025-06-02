@@ -16,15 +16,31 @@ export default function NajdiHra() {
   const [gameOver, setGameOver] = useState(false);
 
   const generateSymbols = () => {
-    const total = 150; // více symbolů pro zaplnění plochy
+    const total = 150;
     const triangleIndex = Math.floor(Math.random() * total);
     const newSymbols = [];
+    const minDistance = 4; // minimální vzdálenost mezi symboly
 
-    for (let i = 0; i < total; i++) {
-      const shape = i === triangleIndex ? "▲" : SHAPES[Math.floor(Math.random() * 3)];
-      const left = Math.random() * 95;
-      const top = Math.random() * 88;
-      newSymbols.push({ shape, id: i, left, top });
+    const isTooClose = (x, y) => {
+      return newSymbols.some(s => {
+        const dx = s.left - x;
+        const dy = s.top - y;
+        return Math.sqrt(dx * dx + dy * dy) < minDistance;
+      });
+    };
+
+    let attempts = 0;
+    while (newSymbols.length < total && attempts < total * 20) {
+      const left = Math.random() * 96; // rozsah % (širší rozložení)
+      const top = Math.random() * 89;
+
+      if (!isTooClose(left, top)) {
+        const i = newSymbols.length;
+        const shape = i === triangleIndex ? "▲" : SHAPES[Math.floor(Math.random() * 3)];
+        newSymbols.push({ shape, id: i, left, top });
+      }
+
+      attempts++;
     }
 
     setSymbols(newSymbols);
@@ -118,10 +134,11 @@ const styles = {
   },
   symbol: {
     position: "absolute",
-    fontSize: "44px", // všechny symboly včetně kolečka jsou stejně velké
+    fontSize: "44px",
     color: "#85CFFF",
     cursor: "pointer",
     userSelect: "none",
+    lineHeight: "1",
   },
   centered: {
     backgroundColor: "#1E1E1E",

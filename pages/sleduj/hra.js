@@ -4,8 +4,8 @@ import { useRouter } from "next/router";
 const getRandomPosition = (radius, width, height, existing = []) => {
   let x, y, valid;
   do {
-    x = Math.random() * (width - 2 * radius) + radius;
-    y = Math.random() * (height - 2 * radius) + radius;
+    x = Math.random() * (width - 2 * radius - 60) + radius + 30;
+    y = Math.random() * (height - 2 * radius - 60) + radius + 30;
     valid = existing.every((p) => Math.hypot(p.x - x, p.y - y) > radius * 2 + 10);
   } while (!valid);
   return { x, y };
@@ -94,13 +94,13 @@ const SledujHra = () => {
           let newX = ball.x + ball.dx;
           let newY = ball.y + ball.dy;
 
-          if (newX <= radius || newX >= clientWidth - radius) ball.dx *= -1;
-          if (newY <= radius || newY >= clientHeight - radius) ball.dy *= -1;
+          if (newX <= radius + 30 || newX >= clientWidth - radius - 30) ball.dx *= -1;
+          if (newY <= radius + 30 || newY >= clientHeight - radius - 30) ball.dy *= -1;
 
           return {
             ...ball,
-            x: Math.min(Math.max(newX, radius), clientWidth - radius),
-            y: Math.min(Math.max(newY, radius), clientHeight - radius),
+            x: Math.min(Math.max(newX, radius + 30), clientWidth - radius - 30),
+            y: Math.min(Math.max(newY, radius + 30), clientHeight - radius - 30),
           };
         });
       });
@@ -133,18 +133,20 @@ const SledujHra = () => {
         margin: 0,
         overflow: "hidden",
         backgroundImage: "url(/goalie.jpg)",
-        backgroundSize: "cover",
+        backgroundSize: "contain", // Zmenšený brankář
+        backgroundRepeat: "no-repeat",
         backgroundPosition: "center",
+        backgroundColor: "black",
       }}
     >
       <div
         ref={containerRef}
         style={{
           position: "absolute",
-          top: 10,
-          bottom: 10,
-          left: 10,
-          right: 10,
+          top: 30,
+          bottom: 30,
+          left: 30,
+          right: 30,
         }}
       >
         {balls.map((ball) => {
@@ -159,9 +161,9 @@ const SledujHra = () => {
                 width: radius * 2,
                 height: radius * 2,
                 borderRadius: "50%",
-                backgroundColor: "yellow",
+                backgroundColor: "#d4ff00", // žlutozelená (tenisák)
                 backgroundImage:
-                  "repeating-linear-gradient(45deg, #fff 0px, #fff 2px, yellow 2px, yellow 6px)",
+                  "repeating-linear-gradient(45deg, #aaa 0px, #aaa 2px, #d4ff00 2px, #d4ff00 6px)", // šedý vzor
                 position: "absolute",
                 left: ball.x - radius,
                 top: ball.y - radius,
