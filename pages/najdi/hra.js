@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 
-const SHAPES = ["⬤", "■", "◆"];
-const SYMBOL_COUNT = 30; // celkový počet symbolů (1 trojúhelník + 29 jiných)
+const SHAPES = ["●", "■", "◆", "▲"];
 const MAX_TIME = 20;
 
 export default function NajdiHra() {
@@ -17,31 +16,15 @@ export default function NajdiHra() {
   const [gameOver, setGameOver] = useState(false);
 
   const generateSymbols = () => {
-    const containerWidth = 400;
-    const containerHeight = 300;
-    const centerX = containerWidth / 2;
-    const centerY = containerHeight / 2;
-    const radiusX = 180;
-    const radiusY = 120;
+    const total = 90; // více symbolů
+    const triangleIndex = Math.floor(Math.random() * total);
+    const newSymbols = [];
 
-    let newSymbols = [];
-
-    // náhodný index pro trojúhelník
-    const triangleIndex = Math.floor(Math.random() * SYMBOL_COUNT);
-
-    for (let i = 0; i < SYMBOL_COUNT; i++) {
-      const angle = Math.random() * Math.PI * 2;
-      const x = centerX + radiusX * Math.cos(angle);
-      const y = centerY + radiusY * Math.sin(angle) * 0.5 + 40; // omezí horní/spodní část
-
-      const shape = i === triangleIndex ? "▲" : SHAPES[Math.floor(Math.random() * SHAPES.length)];
-
-      newSymbols.push({
-        shape,
-        id: i,
-        left: x,
-        top: y
-      });
+    for (let i = 0; i < total; i++) {
+      const shape = i === triangleIndex ? "▲" : SHAPES[Math.floor(Math.random() * 3)];
+      const left = Math.random() * 95; // hustší rozložení
+      const top = Math.random() * 88;  // hustší rozložení
+      newSymbols.push({ shape, id: i, left, top });
     }
 
     setSymbols(newSymbols);
@@ -51,7 +34,7 @@ export default function NajdiHra() {
 
   useEffect(() => {
     if (round < totalRounds) {
-      setTimeout(generateSymbols, 50);
+      generateSymbols();
     } else {
       setGameOver(true);
     }
@@ -95,16 +78,16 @@ export default function NajdiHra() {
         <h2 style={styles.text}>Kolo {round + 1} z {totalRounds}</h2>
         <p style={styles.text}>Zbývá čas: {timeLeft}s</p>
       </div>
-      <div style={styles.playArea}>
+      <div style={styles.board}>
         {symbols.map((s) => (
           <div
             key={s.id}
-            onClick={() => handleClick(s)}
             style={{
               ...styles.symbol,
-              left: s.left,
-              top: s.top,
+              left: `${s.left}%`,
+              top: `${s.top}%`,
             }}
+            onClick={() => handleClick(s)}
           >
             {s.shape}
           </div>
@@ -116,42 +99,29 @@ export default function NajdiHra() {
 
 const styles = {
   wrapper: {
-    backgroundColor: "#1E1E1E",
-    height: "100vh",
-    color: "#85CFFF",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center"
+    backgroundColor: "#1E1E1E", // šedočerné pozadí
+    position: "relative",
+    minHeight: "100vh",
+    overflow: "hidden",
   },
   header: {
-    marginTop: 20,
-    marginBottom: 10,
     textAlign: "center",
+    paddingTop: "20px",
   },
   text: {
-    margin: 0,
+    color: "#85CFFF", // světle modré písmo
   },
-  playArea: {
+  board: {
     position: "relative",
-    width: 400,
-    height: 300,
-    backgroundColor: "#121212",
-    border: "2px solid #85CFFF",
-    borderRadius: "16px",
-    overflow: "hidden",
-    marginTop: 10,
+    width: "100%",
+    height: "80vh", // herní plocha zůstává stejná
   },
   symbol: {
     position: "absolute",
-    fontSize: "32px",
-    width: "32px",
-    height: "32px",
-    textAlign: "center",
-    lineHeight: "32px",
+    fontSize: "44px", // o trochu větší symboly
     color: "#85CFFF",
-    userSelect: "none",
     cursor: "pointer",
-    transform: "translate(-50%, -50%)",
+    userSelect: "none",
   },
   centered: {
     backgroundColor: "#1E1E1E",
@@ -160,6 +130,7 @@ const styles = {
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
+    textAlign: "center",
     gap: "20px",
     color: "#85CFFF",
   },
