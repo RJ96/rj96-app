@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import { useRouter } from "next/router";
 import background from "/goalie.jpg"; // obrázek v public složce
 
 const getRandomPosition = (radius, width, height, existing = []) => {
@@ -11,7 +12,10 @@ const getRandomPosition = (radius, width, height, existing = []) => {
   return { x, y };
 };
 
-const SledujHra = ({ settings, onRestart }) => {
+const SledujHra = ({ onRestart }) => {
+  const router = useRouter();
+
+  const [settings, setSettings] = useState(null);
   const [balls, setBalls] = useState([]);
   const [selectedBalls, setSelectedBalls] = useState([]);
   const [markedBalls, setMarkedBalls] = useState([]);
@@ -20,17 +24,31 @@ const SledujHra = ({ settings, onRestart }) => {
   const [results, setResults] = useState({ correct: 0, incorrect: 0 });
 
   const radius = 30;
-  const speed = settings.speed;
   const intervalRef = useRef(null);
 
   useEffect(() => {
+    if (!router.isReady) return;
+
+    const { totalBalls, markedCount, speed, duration } = router.query;
+
+    setSettings({
+      totalBalls: parseInt(totalBalls),
+      markedCount: parseInt(markedCount),
+      speed: parseFloat(speed),
+      duration: parseInt(duration),
+    });
+  }, [router.isReady, router.query]);
+
+  useEffect(() => {
+    if (!settings) return;
+
     const newBalls = [];
     for (let i = 0; i < settings.totalBalls; i++) {
       const position = getRandomPosition(radius, 600, 400, newBalls);
       newBalls.push({
         ...position,
-        dx: speed,
-        dy: speed,
+        dx: settings.speed,
+        dy: settings.speed,
         id: i,
       });
     }
@@ -46,16 +64,22 @@ const SledujHra = ({ settings, onRestart }) => {
     setGameOver(false);
     setResults({ correct: 0, incorrect: 0 });
 
-    setTimeout(() => {
+    const showNumbersTimeout = setTimeout(() => {
       setShowNumbers(false);
       startMovingBalls();
     }, 5000); // 5 sekund na zapamatování
 
-    setTimeout(() => {
+    const endGameTimeout = setTimeout(() => {
       stopMovingBalls();
       setGameOver(true);
     }, settings.duration * 1000 + 5000); // konec hry
-  }, []);
+
+    return () => {
+      clearTimeout(showNumbersTimeout);
+      clearTimeout(endGameTimeout);
+      stopMovingBalls();
+    };
+  }, [settings]);
 
   const startMovingBalls = () => {
     intervalRef.current = setInterval(() => {
@@ -93,6 +117,8 @@ const SledujHra = ({ settings, onRestart }) => {
       setResults({ correct, incorrect });
     }
   };
+
+  if (!settings) return <div>Načítání...</div>;
 
   return (
     <div style={{ textAlign: "center" }}>
@@ -138,9 +164,7 @@ const SledujHra = ({ settings, onRestart }) => {
               }}
             >
               {gameOver && isMarked ? markedBalls.indexOf(ball.id) + 1 : ""}
-              {showNumbers && isCorrect
-                ? selectedBalls.indexOf(ball.id) + 1
-                : ""}
+              {showNumbers && isCorrect ? selectedBalls.indexOf(ball.id) + 1 : ""}
             </div>
           );
         })}
@@ -154,7 +178,7 @@ const SledujHra = ({ settings, onRestart }) => {
       )}
 
       {gameOver && (
-        <button style={{ marginTop: 10 }} onClick={onRestart}>
+        <button style={{ marginTop: 10 }} onClick={() => router.push("/sleduj")}>
           Nová hra
         </button>
       )}
