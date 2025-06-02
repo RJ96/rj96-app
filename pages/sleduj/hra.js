@@ -11,6 +11,13 @@ const getRandomPosition = (radius, width, height, existing = []) => {
 };
 
 const SledujHra = ({ settings, onRestart }) => {
+  const {
+    totalBalls = 5,
+    markedCount = 2,
+    speed = 3,
+    duration = 10,
+  } = settings;
+
   const [balls, setBalls] = useState([]);
   const [selectedBalls, setSelectedBalls] = useState([]);
   const [markedBalls, setMarkedBalls] = useState([]);
@@ -19,27 +26,20 @@ const SledujHra = ({ settings, onRestart }) => {
   const [results, setResults] = useState({ correct: 0, incorrect: 0 });
 
   const radius = 30;
-  const speed = settings.speed;
   const intervalRef = useRef(null);
 
   useEffect(() => {
     const newBalls = [];
-    for (let i = 0; i < settings.totalBalls; i++) {
+    for (let i = 0; i < totalBalls; i++) {
       const position = getRandomPosition(radius, 600, 400, newBalls);
       const angle = Math.random() * 2 * Math.PI;
       const dx = speed * Math.cos(angle);
       const dy = speed * Math.sin(angle);
-      newBalls.push({
-        ...position,
-        dx,
-        dy,
-        id: i,
-      });
+      newBalls.push({ ...position, dx, dy, id: i });
     }
 
-    const indices = [...Array(settings.totalBalls).keys()];
-    indices.sort(() => 0.5 - Math.random());
-    const selected = indices.slice(0, settings.markedCount);
+    const indices = Array.from({ length: totalBalls }, (_, i) => i).sort(() => 0.5 - Math.random());
+    const selected = indices.slice(0, markedCount);
 
     setBalls(newBalls);
     setSelectedBalls(selected);
@@ -51,20 +51,19 @@ const SledujHra = ({ settings, onRestart }) => {
     const showNumbersTimeout = setTimeout(() => {
       setShowNumbers(false);
       startMovingBalls();
-    }, 5000); // 5 sekund na zapamatování
+    }, 5000);
 
     const gameDurationTimeout = setTimeout(() => {
       stopMovingBalls();
       setGameOver(true);
-    }, settings.duration * 1000 + 5000); // konec hry
+    }, duration * 1000 + 5000);
 
     return () => {
       clearTimeout(showNumbersTimeout);
       clearTimeout(gameDurationTimeout);
       stopMovingBalls();
     };
-    // Přidáno settings jako závislost, aby se hra restartovala po změně nastavení
-  }, [settings]);
+  }, [totalBalls, markedCount, speed, duration]);
 
   const startMovingBalls = () => {
     intervalRef.current = setInterval(() => {
@@ -72,7 +71,6 @@ const SledujHra = ({ settings, onRestart }) => {
         prevBalls.map((ball) => {
           let newX = ball.x + ball.dx;
           let newY = ball.y + ball.dy;
-
           let dx = ball.dx;
           let dy = ball.dy;
 
@@ -81,8 +79,8 @@ const SledujHra = ({ settings, onRestart }) => {
 
           return {
             ...ball,
-            x: newX <= radius ? radius : newX >= 600 - radius ? 600 - radius : newX,
-            y: newY <= radius ? radius : newY >= 400 - radius ? 400 - radius : newY,
+            x: Math.max(radius, Math.min(600 - radius, newX)),
+            y: Math.max(radius, Math.min(400 - radius, newY)),
             dx,
             dy,
           };
@@ -97,7 +95,6 @@ const SledujHra = ({ settings, onRestart }) => {
 
   const handleBallClick = (id) => {
     if (!gameOver || markedBalls.includes(id)) return;
-
     const newMarked = [...markedBalls, id];
     setMarkedBalls(newMarked);
 
@@ -109,17 +106,18 @@ const SledujHra = ({ settings, onRestart }) => {
   };
 
   return (
-    <div style={{ textAlign: "center" }}>
+    <div style={{ textAlign: "center", padding: 20 }}>
       <h1>Sleduj – Hra</h1>
       <div
         style={{
           width: 600,
           height: 400,
           margin: "0 auto",
-          backgroundImage: `url('/goalie.jpg')`,
+          backgroundImage: `url("/goalie.jpg")`,
           backgroundSize: "cover",
           position: "relative",
           border: "2px solid black",
+          userSelect: "none",
         }}
       >
         {balls.map((ball) => {
@@ -151,22 +149,25 @@ const SledujHra = ({ settings, onRestart }) => {
                   : "none",
               }}
             >
-              {gameOver && isMarked ? markedBalls.indexOf(ball.id) + 1 : ""}
-              {showNumbers && isCorrect ? selectedBalls.indexOf(ball.id) + 1 : ""}
+              {gameOver && isMarked
+                ? markedBalls.indexOf(ball.id) + 1
+                : showNumbers && isCorrect
+                ? selectedBalls.indexOf(ball.id) + 1
+                : ""}
             </div>
           );
         })}
       </div>
 
       {gameOver && markedBalls.length === selectedBalls.length && (
-        <div style={{ margin: 10 }}>
+        <div style={{ margin: 10, fontSize: 18 }}>
           ✅ Správně: {results.correct} <br />
           ❌ Špatně: {results.incorrect}
         </div>
       )}
 
       {gameOver && (
-        <button style={{ marginTop: 10 }} onClick={onRestart}>
+        <button onClick={onRestart} style={{ padding: "8px 16px", fontSize: 16 }}>
           Nová hra
         </button>
       )}
@@ -174,4 +175,25 @@ const SledujHra = ({ settings, onRestart }) => {
   );
 };
 
-export default SledujHra;
+const HraPage = () => {
+  const [settings, setSettings] = useState(null);
+
+  useEffect(() => {
+    const savedSettings = localStorage.getItem("sledujSettings");
+    if (savedSettings) {
+      setSettings(JSON.parse(savedSettings));
+    } else {
+      window.location.href = "/sleduj/nastaveni";
+    }
+  }, []);
+
+  const handleRestart = () => {
+    window.location.href = "/sleduj/nastaveni";
+  };
+
+  if (!settings) return <div>Načítám nastavení...</div>;
+
+  return <SledujHra settings={settings} onRestart={handleRestart} />;
+};
+
+export default HraPage;
